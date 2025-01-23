@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\itali\\documents\\github\\schefflera\\schefflera.csproj",
+      "projectUniqueName": "C:\\Users\\itali\\Documents\\GitHub\\Schefflera\\schefflera.csproj",
       "projectName": "schefflera",
-      "projectPath": "C:\\Users\\itali\\documents\\github\\schefflera\\schefflera.csproj",
+      "projectPath": "C:\\Users\\itali\\Documents\\GitHub\\Schefflera\\schefflera.csproj",
       "packagesPath": "C:\\Users\\itali\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\itali\\documents\\github\\schefflera\\obj\\",
+      "outputPath": "C:\\Users\\itali\\Documents\\GitHub\\Schefflera\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\itali\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -64,7 +64,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.405/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

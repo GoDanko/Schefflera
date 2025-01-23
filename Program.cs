@@ -9,6 +9,8 @@ namespace Schefflera
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+            // After You created a LayoutManager that draws an image
+            // You can start creating the first menu with UIElements
         }
     }
 }
