@@ -11,6 +11,8 @@ namespace Schefflera
             Console.WriteLine("Hello World!");
             // After You created a LayoutManager that draws an image
             // You can start creating the first menu with UIElements
+
+            DrawController frame = new DrawController();
         }
     }
 }

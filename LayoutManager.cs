@@ -2,54 +2,41 @@ using System;
 
 namespace Layout
 {
-    public class FrameBuilder {
-        public short MaxX {get; set;}
-        public short MaxY {get; set;}
+    public class DrawController {
+        readonly public short MaxX;
+        readonly public short MaxY;
         private char[,] Display {get; set;}
         public byte[,] DisplayMap {get; set;}
         public List<UIElement> UiElements {get; set;}
-        public FrameBuilder() {
-            // Make sure that the UIElements can be mapped after the FrameBuilder object is created
-            // and that You don't need UiElements to create the instance (Add a Draw method)
-
+        public DrawController() {
             MaxX = (short)Console.BufferWidth;
             MaxY = (short)Console.BufferHeight;
 
             UiElements = new List<UIElement> ();
             Display = new char[,] {};
             DisplayMap = new byte[,] {};
-
-            // FIGURE OUT which methods will be needed to create an instance of FrameBuilder
-
-            InitializeDisplay(Display, DisplayMap);
-            Draw();
         }
 
-        char [,] InitializeDisplay(char [,] display, byte[,] displayMap) {
+        internal char[,] InitializeDisplay(char [,] display, byte[,] displayMap) {
             for (short y = 0; y < MaxY; y++) {
                 for (short x = 0; x < MaxX; x++) {
                     if (displayMap[x, y] != 0) {
                         if (UiElements[displayMap[x, y]].OnScreen && !UiElements[displayMap[x, y]].Initialised) {
-                            display = QueueNewElement(UiElements[displayMap[x, y]], display);
+                            display = PushToDisplay(UiElements[displayMap[x, y]], displayMap, display);
                         } else continue;
                     }
                 }
             }
+            Draw();
             return display;
         }
 
-        char[,] QueueNewElement(UIElement element, char[,] display) {
+        private char[,] PushToDisplay(UIElement element, byte[,] displayMap, char[,] display) {
             for (short y = element.Y; y < element.Y + element.Height; y++) {
-                if ((element.Y + element.Height) >= MaxY) {
-                    element.CantDrawY = true;
-                    break;
-                }
                 for (short x = element.X; x < element.X + element.Width; x++) {
-                    if ((element.X + element.Width) >= MaxX) {
-                        element.CantDrawX = true;
-                        break;
+                    if (displayMap[x, y] == element.MappedID) {
+                        display[x, y] = element.Content[x - element.X, y - element.Y];
                     }
-                    display[x, y] = element.Content[x - element.X][y - element.Y];
                 }
                 element.Initialised = true;
             }
@@ -57,21 +44,18 @@ namespace Layout
         }
 
         void Draw() {
-            int yLength = Display.GetLength(0);
-            int xLength = Display.GetLength(1);
-            
-            for (int y = 0; y < yLength; y++) {
-                for (int x = 0; x < xLength; x++) {
-                    Console.Write(Display[y, x]);
+            for (int y = 0; y < MaxY; y++) {
+                for (int x = 0; x < MaxX; x++) {
+                    Console.Write(Display[y, x] == '\0' ? ' ' : Display[y, x]);
                 }
-                Console.Write("\n");
+                Console.SetCursorPosition(0, y +1);
             }
         }
     }
 
     public class UIElement
     {
-        public byte MapID {get; set;}
+        public byte MappedID {get; set;}
         internal bool CantDrawX {get; set;} = false;
         internal bool CantDrawY {get; set;} = false;
         public bool Initialised {get; set;}
@@ -81,7 +65,23 @@ namespace Layout
         public short Width {get; set;}
         public short Height {get; set;}
         public byte Z {get; set;}
-        public string[] Content {get; set;} = new string[] {""};
+        public char[,] Content {get; set;}
+        private List<byte> _overlayingIDs = new List<byte> ();
+        public List<byte> OverlayingIDs {
+            get { return _overlayingIDs; }
+            set {
+                foreach (byte AddedValue in value) {
+                    bool alreadyAdded = false;
+                    foreach (byte ID in _overlayingIDs) {
+                        if (AddedValue < 255 && AddedValue == ID) {
+                            alreadyAdded = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyAdded) _overlayingIDs.Add(AddedValue);
+                }
+            }
+        }
 
         public UIElement(short x, short y, short width, short height, byte z = 128) {
             X = x;
@@ -89,12 +89,13 @@ namespace Layout
             Z = Z;
             Width = width;
             Height = height;
+            Content = new char[x, y];
         }
 
-        void MapElementToFrame(FrameBuilder frame) {
+        void MapElementToFrame(DrawController frame) {
             if (frame.DisplayMap != null) {
-                if (frame.UiElements.Count > 256) {
-                    this.MapID = (byte)(frame.UiElements.Count + 1);
+                if (frame.UiElements.Count < 256) {
+                    this.MappedID = (byte)(frame.UiElements.Count + 1);
                 } else {
                     CantDrawX = true;
                     CantDrawY = true;
@@ -111,16 +112,18 @@ namespace Layout
                             break;
                         }
                         if (frame.DisplayMap[x, y] == 0 || !frame.UiElements[frame.DisplayMap[x, y]].OnScreen) {
-                            frame.DisplayMap[x, y] = this.MapID;
+                            frame.DisplayMap[x, y] = this.MappedID;
                         } else {
-                            if (frame.UiElements[frame.DisplayMap[x, y]].Z <= this.Z) frame.DisplayMap[x, y] = this.MapID;
-                            else continue;
+                            if (frame.UiElements[frame.DisplayMap[x, y]].Z <= this.Z) frame.DisplayMap[x, y] = this.MappedID;
+                            this.OverlayingIDs = new List<byte> {frame.DisplayMap[x, y]};
+                            frame.UiElements[frame.DisplayMap[x, y]].OverlayingIDs = new List<byte>{this.MappedID};
+                            continue;
                         }
                     }
                 }
                 frame.UiElements.Add(this);
             } else {
-                Console.Write("Initialise instance of FrameBuilder's with a DisplayMap first");
+                Console.Write("Initialise instance of DrawController's with a DisplayMap first");
             }
         }
     }
