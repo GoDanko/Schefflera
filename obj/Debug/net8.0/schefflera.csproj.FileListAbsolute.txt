@@ -1,0 +1,15 @@
+C:\Users\itali\documents\github\schefflera\bin\Debug\net8.0\schefflera.exe
+C:\Users\itali\documents\github\schefflera\bin\Debug\net8.0\schefflera.deps.json
+C:\Users\itali\documents\github\schefflera\bin\Debug\net8.0\schefflera.runtimeconfig.json
+C:\Users\itali\documents\github\schefflera\bin\Debug\net8.0\schefflera.dll
+C:\Users\itali\documents\github\schefflera\bin\Debug\net8.0\schefflera.pdb
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\schefflera.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\schefflera.AssemblyInfoInputs.cache
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\schefflera.AssemblyInfo.cs
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\schefflera.csproj.CoreCompileInputs.cache
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\schefflera.sourcelink.json
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\schefflera.dll
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\refint\schefflera.dll
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\schefflera.pdb
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\schefflera.genruntimeconfig.cache
+C:\Users\itali\documents\github\schefflera\obj\Debug\net8.0\ref\schefflera.dll

@@ -8,11 +8,32 @@ namespace Schefflera
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-            // After You created a LayoutManager that draws an image
-            // You can start creating the first menu with UIElements
+            UIElement commands = new UIElement(new string[] {"--------------------------------",
+            "|  Enter-continue Escape-Quit  |",
+            "--------------------------------"}, 2, 1);
 
-            DrawController frame = new DrawController();
+            UIElement textWindow = new UIElement(new string[] {"--------------------------------",
+                "|                              |",
+                "|                              |",
+                "|                              |",
+                "|                              |",
+                "|                              |",
+                "|                              |",
+                "|                              |",
+                "|                              |",
+                "|                              |",
+                "|                              |",
+                "--------------------------------"}, 12, 6);
+
+            commands.CastOnDisplay();
+            textWindow.CastOnDisplay();
+
+            DrawController.Draw();
+
+            string? input = Console.ReadLine();
+            if (input == null || input.ToLower() == "cls") {
+                Console.Clear();
+            }
         }
     }
 }
