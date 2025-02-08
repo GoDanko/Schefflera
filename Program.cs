@@ -8,11 +8,13 @@ namespace Schefflera
     {
         static void Main(string[] args)
         {
-            UIElement commands = new UIElement(new string[] {"--------------------------------",
+            UIElement commands = new UIElement(2, 1);
+            commands.Content = new string[] {"--------------------------------",
             "|  Enter-continue Escape-Quit  |",
-            "--------------------------------"}, 2, 1);
+            "--------------------------------"};
 
-            UIElement textWindow = new UIElement(new string[] {"--------------------------------",
+            UIElement textWindow = new UIElement(12, 6);
+            textWindow.Content = new string[] {"--------------------------------",
                 "|                              |",
                 "|                              |",
                 "|                              |",
@@ -23,10 +25,10 @@ namespace Schefflera
                 "|                              |",
                 "|                              |",
                 "|                              |",
-                "--------------------------------"}, 12, 6);
+                "--------------------------------"};
 
-            commands.CastOnDisplay();
-            textWindow.CastOnDisplay();
+            DrawController.CastOnDisplay(commands);
+            DrawController.CastOnDisplay(textWindow);
 
             DrawController.Draw();
 

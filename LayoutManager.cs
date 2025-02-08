@@ -7,15 +7,41 @@ namespace Layout
         static private short MaxX {get; set;}
         static private short MaxY {get; set;}
 
+        static internal void CastOnDisplay(UIElement element) {
+            for (short y = 0; y < element.Height; y++) {
+                for (short x = 0; x < element.Width; x++) {
+                    if (x >= element.Content[y].Length) break;
+                    DrawController.Display[y + element.Y, x + element.X] = element.Content[y][x];
+                }
+            }
+        }
+
         static internal void Draw() {
-            MaxX = (short) (Console.BufferWidth + 12); // for some reason the buffer is -12 than in reality
+            Console.Clear();
+            MaxX = (short) (Console.BufferWidth + 12); // for some reason the buffer is -12
             MaxY = (short) Console.BufferHeight;
 
             for (short y = 0; y < MaxY; y++) {
+                string rowContent = "";
                 for (short x = 0; x < MaxX; x++) {
-                    Console.Write(Display[y, x]);
+                    rowContent += Display[y, x];
                 }
-                Console.Write("\n");
+                Console.Write(rowContent + "\n");
+            }
+            Console.WriteLine(MaxX + "x" + MaxY);
+        }
+
+        static internal void Draw(UIElement element) {
+            CastOnDisplay(element);
+            MaxX = (short) (Console.BufferWidth + 12); // for some reason the buffer is -12
+            MaxY = (short) Console.BufferHeight;
+
+            for (short y = 0; y < MaxY; y++) {
+                string rowContent = "";
+                for (short x = 0; x < MaxX; x++) {
+                    rowContent += Display[y, x];
+                }
+                Console.Write(rowContent + "\n");
             }
             Console.WriteLine(MaxX + "x" + MaxY);
         }
@@ -27,25 +53,22 @@ namespace Layout
         public short Y {get; set;}
         public short Width {get; set;}
         public short Height {get; set;}
-        public byte Z {get; set;}
-        public string[] Content {get; set;}
-
-        public UIElement(string[] content, short x, short y, byte z = 128) {
-            X = x;
-            Y = y;
-            Z = z;
-            Height = (short) content.Length;
-            Width = FindWidth(content);
-            Content = content;
-        }
-
-        internal void CastOnDisplay() {
-            for (short y = 0; y < Height; y++) {
-                for (short x = 0; x < Width; x++) {
-                    if (x >= Content[y].Length) break;
-                    DrawController.Display[y + Y, x + X] = Content[y][x];
+        private string[] content = new string[0];
+        public string[] Content {
+            get {return content;}
+            set {
+                if (value != null) {
+                    Height = (short) value.Length;
+                    Width = FindWidth(value);
+                    content = value;
                 }
             }
+        }
+
+        public UIElement(short x, short y) {
+            Content = new string[0];
+            X = x;
+            Y = y;
         }
         
         short FindWidth(string[] content) {
@@ -54,6 +77,29 @@ namespace Layout
                 if (longestRow < row.Length) longestRow = (short) row.Length;
             }
             return longestRow;
+        }
+    }
+
+    public class TextEditorWindow : UIElement {
+        private readonly string[] FixedContent;
+
+        public TextEditorWindow(short x, short y, short Width, short height) : base(x, y) {
+
+        }
+
+        void AffirmFixedContent() {
+            List<string> fixedContent = new List<string> ();
+            for (int i = 0; i < Width; i++) {
+                string rowContent = "";
+                for (int j = 0; j < Height; j++) {
+                    if (i == 0 || i == Height) rowContent += '-';
+                    else if (j == 0 || j == Width) rowContent += '|';
+                    else rowContent += ' '; // Modify it, so you can skip the overwriting of the boxes between,
+                                            // because you probably will be using this method also to correct
+                                            // every attempt at overwriting the "FixedContent", without over-
+                                            // writing the inside.
+                }
+            }
         }
     }
 }
