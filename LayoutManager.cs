@@ -7,19 +7,33 @@ namespace Layout
         static private short MaxX {get; set;}
         static private short MaxY {get; set;}
 
-        static internal void CastOnDisplay(UIElement element) {
+        static internal void CastOnDisplayBuffer(UIElement element) {
             for (short y = 0; y < element.Height; y++) {
+                // for (short i = 0; i < element.X; i++) {
+                //     if (DrawController.Display[y + element.Y, i] != '\0') continue;
+                //     else DrawController.Display[y + element.Y, i] = '\0';
+                // }
                 for (short x = 0; x < element.Width; x++) {
-                    if (x >= element.Content[y].Length) break;
-                    DrawController.Display[y + element.Y, x + element.X] = element.Content[y][x];
+                    if (y + element.Y < MaxY || x + element.X < MaxX) {
+                        DrawController.Display[y + element.Y, x + element.X] = element.Content[y][x];
+                    }
+                }
+            }
+        }
+
+        static public void ClearDisplayBuffer(char defaultChar = ' ') {
+            AdjustConsoleBufferSize(default, -4);
+            for (int y = 0; y < MaxY; y++) {
+                for (int x = 0; x < MaxX; x++){
+                    Display[y, x] = defaultChar;
                 }
             }
         }
 
         static internal void Draw() {
             Console.Clear();
-            MaxX = (short) (Console.BufferWidth + 12); // for some reason the buffer is -12
-            MaxY = (short) Console.BufferHeight;
+            Console.SetCursorPosition(0, 0);
+            AdjustConsoleBufferSize(default, -4);
 
             for (short y = 0; y < MaxY; y++) {
                 string rowContent = "";
@@ -32,9 +46,8 @@ namespace Layout
         }
 
         static internal void Draw(UIElement element) {
-            CastOnDisplay(element);
-            MaxX = (short) (Console.BufferWidth + 12); // for some reason the buffer is -12
-            MaxY = (short) Console.BufferHeight;
+            CastOnDisplayBuffer(element);
+            AdjustConsoleBufferSize(default, -4);
 
             for (short y = 0; y < MaxY; y++) {
                 string rowContent = "";
@@ -44,6 +57,11 @@ namespace Layout
                 Console.Write(rowContent + "\n");
             }
             Console.WriteLine(MaxX + "x" + MaxY);
+        }
+
+        static void AdjustConsoleBufferSize(short correctionX = 0, short correctionY = 0) {
+            MaxX = (short) (Console.BufferWidth + correctionX);
+            MaxY = (short) (Console.BufferHeight + correctionY);
         }
     }
 
@@ -83,21 +101,23 @@ namespace Layout
     public class TextEditorWindow : UIElement {
         private readonly string[] FixedContent;
 
-        public TextEditorWindow(short x, short y, short Width, short height) : base(x, y) {
-
+        public TextEditorWindow(short x, short y, short width, short height) : base(x, y) {
+            Width = width;
+            Height = height;
         }
 
-        void AffirmFixedContent() {
-            List<string> fixedContent = new List<string> ();
-            for (int i = 0; i < Width; i++) {
+        public void AffirmFixedContent() {
+            List<string> result = new List<string> ();
+            for (short x = 0; x < Width; x++) {
                 string rowContent = "";
-                for (int j = 0; j < Height; j++) {
-                    if (i == 0 || i == Height) rowContent += '-';
-                    else if (j == 0 || j == Width) rowContent += '|';
-                    else rowContent += ' '; // Modify it, so you can skip the overwriting of the boxes between,
-                                            // because you probably will be using this method also to correct
-                                            // every attempt at overwriting the "FixedContent", without over-
-                                            // writing the inside.
+                for (short y = 0; y < Height; y++) {
+                    if (x == 1 || x == Height) rowContent += '-';
+                    else if (y == 1 || y == Width) rowContent += '|';
+                    else {
+                        // if (Content[y][x] != ' ') rowContent += Content[y][x];
+                        // else 
+                        rowContent += ' ';
+                    };
                 }
             }
         }

@@ -13,29 +13,29 @@ namespace Schefflera
             "|  Enter-continue Escape-Quit  |",
             "--------------------------------"};
 
-            UIElement textWindow = new UIElement(12, 6);
-            textWindow.Content = new string[] {"--------------------------------",
-                "|                              |",
-                "|                              |",
-                "|                              |",
-                "|                              |",
-                "|                              |",
-                "|                              |",
-                "|                              |",
-                "|                              |",
-                "|                              |",
-                "|                              |",
-                "--------------------------------"};
+            UIElement textWindow = new UIElement(2, 6);
+            textWindow.Content = new string[] {"--------------------------------------------",
+                "|                                          |",
+                "|                                          |",
+                "|                                          |",
+                "|                                          |",
+                "|                                          |",
+                "|                                          |",
+                "|                                          |",
+                "|                                          |",
+                "|                                          |",
+                "|                                          |",
+                "--------------------------------------------"};
+            
+            TextEditorWindow editorWindow = new TextEditorWindow(48, 6, 16, 8);
+            editorWindow.AffirmFixedContent();  // This leads to the Casting on the display not working. Figure out why and fix it lol
 
-            DrawController.CastOnDisplay(commands);
-            DrawController.CastOnDisplay(textWindow);
-
+            DrawController.ClearDisplayBuffer('x');
+            DrawController.CastOnDisplayBuffer(commands);
+            DrawController.CastOnDisplayBuffer(textWindow);
+            DrawController.CastOnDisplayBuffer(editorWindow);   // This ain't working, because of the Fixed content being incorrectly drawn
             DrawController.Draw();
 
-            string? input = Console.ReadLine();
-            if (input == null || input.ToLower() == "cls") {
-                Console.Clear();
-            }
         }
     }
 }
