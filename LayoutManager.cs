@@ -3,16 +3,12 @@ using System;
 namespace Layout
 {
     public static class DrawController {
-        static internal char[,] Display = new char[256,256];
+        static private char[,] Display = new char[256,256];
         static private short MaxX {get; set;}
         static private short MaxY {get; set;}
 
         static internal void CastOnDisplayBuffer(UIElement element) {
             for (short y = 0; y < element.Height; y++) {
-                // for (short i = 0; i < element.X; i++) {
-                //     if (DrawController.Display[y + element.Y, i] != '\0') continue;
-                //     else DrawController.Display[y + element.Y, i] = '\0';
-                // }
                 for (short x = 0; x < element.Width; x++) {
                     if (y + element.Y < MaxY || x + element.X < MaxX) {
                         DrawController.Display[y + element.Y, x + element.X] = element.Content[y][x];
@@ -21,7 +17,7 @@ namespace Layout
             }
         }
 
-        static public void ClearDisplayBuffer(char defaultChar = ' ') {
+        static public void ReinitialiseDisplayBuffer(char defaultChar = ' ') {
             AdjustConsoleBufferSize(default, -4);
             for (int y = 0; y < MaxY; y++) {
                 for (int x = 0; x < MaxX; x++){
@@ -113,12 +109,9 @@ namespace Layout
                 for (short y = 0; y < Height; y++) {
                     if (x == 1 || x == Height) rowContent += '-';
                     else if (y == 1 || y == Width) rowContent += '|';
-                    else {
-                        // if (Content[y][x] != ' ') rowContent += Content[y][x];
-                        // else 
-                        rowContent += ' ';
-                    };
+                    else rowContent += ' ';
                 }
+                Content[x] = rowContent;
             }
         }
     }
