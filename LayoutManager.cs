@@ -1,6 +1,6 @@
 using System;
 
-namespace Layout
+namespace LayoutMod
 {
     public static class DrawController {
         static private char[,] Display = new char[256,256];
@@ -29,20 +29,6 @@ namespace Layout
         static internal void Draw() {
             Console.Clear();
             Console.SetCursorPosition(0, 0);
-            AdjustConsoleBufferSize(default, -4);
-
-            for (short y = 0; y < MaxY; y++) {
-                string rowContent = "";
-                for (short x = 0; x < MaxX; x++) {
-                    rowContent += Display[y, x];
-                }
-                Console.Write(rowContent + "\n");
-            }
-            Console.WriteLine(MaxX + "x" + MaxY);
-        }
-
-        static internal void Draw(UIElement element) {
-            CastOnDisplayBuffer(element);
             AdjustConsoleBufferSize(default, -4);
 
             for (short y = 0; y < MaxY; y++) {
@@ -95,24 +81,24 @@ namespace Layout
     }
 
     public class TextEditorWindow : UIElement {
-        private readonly string[] FixedContent;
-
         public TextEditorWindow(short x, short y, short width, short height) : base(x, y) {
             Width = width;
             Height = height;
+            Content = AffirmFixedContent();
         }
 
-        public void AffirmFixedContent() {
+        public string[] AffirmFixedContent() {
             List<string> result = new List<string> ();
-            for (short x = 0; x < Width; x++) {
+            for (short y = 0; y < Height; y++) {
                 string rowContent = "";
-                for (short y = 0; y < Height; y++) {
-                    if (x == 1 || x == Height) rowContent += '-';
-                    else if (y == 1 || y == Width) rowContent += '|';
+                for (short x = 0; x < Width; x++) {
+                    if (y == 0 || y == Height -1) rowContent += '-';
+                    else if (x == 0 || x == Width -1) rowContent += '|';
                     else rowContent += ' ';
                 }
-                Content[x] = rowContent;
+                result.Add(rowContent);
             }
+            return result.ToArray();
         }
     }
 }
