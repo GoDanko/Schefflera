@@ -1,11 +1,15 @@
 using System;
+using System.ComponentModel;
+using TextMod;
 
 namespace LayoutMod
 {
     public static class DrawController {
         static private char[,] Display = new char[256,256];
-        static private short MaxX {get; set;}
-        static private short MaxY {get; set;}
+        static private short maxX {get; set;}
+        static private short maxY {get; set;}
+        static internal short MaxX {get {return maxX;} set {maxX = value;}}
+        static internal short MaxY {get{return maxY;} set {maxY = value;}}
 
         static internal void CastOnDisplayBuffer(UIElement element) {
             for (short y = 0; y < element.Height; y++) {
@@ -39,6 +43,28 @@ namespace LayoutMod
                 Console.Write(rowContent + "\n");
             }
             Console.WriteLine(MaxX + "x" + MaxY);
+        }
+
+        static internal void Draw(UIElement specificElement) {
+            AdjustConsoleBufferSize(default);
+            Console.SetCursorPosition(specificElement.X, specificElement.Y);
+
+            for (short y = 0; y < specificElement.Height; y++) {
+                string rowContent = "";
+                if (y >= MaxY) {
+                    new DiagnosticMsg("Avoided Overflow on Y axis");
+                    break;
+                }
+                for (short x = 0; x < specificElement.Width; x++) {
+                    rowContent += specificElement.Content[y][x];
+                    if (x >= MaxX) {
+                        new DiagnosticMsg("Avoided Overflow on X axis");
+                        break;
+                    }
+                }
+                Console.Write(rowContent);
+                Console.SetCursorPosition(specificElement.X, specificElement.Y + y + 1);
+            }
         }
 
         static void AdjustConsoleBufferSize(short correctionX = 0, short correctionY = 0) {
@@ -92,6 +118,7 @@ namespace LayoutMod
             for (short y = 0; y < Height; y++) {
                 string rowContent = "";
                 for (short x = 0; x < Width; x++) {
+                    // Thread.Sleep(300);
                     if (y == 0 || y == Height -1) rowContent += '-';
                     else if (x == 0 || x == Width -1) rowContent += '|';
                     else rowContent += ' ';
@@ -99,6 +126,32 @@ namespace LayoutMod
                 result.Add(rowContent);
             }
             return result.ToArray();
+        }
+
+        internal void AccessEditor() {
+            TextEditor editingLogic = new TextEditor(this);
+            
+            bool leaveLoop = false;
+            do {
+                leaveLoop = editingLogic.RequestKey();
+            } while (!leaveLoop);
+        }
+    }
+
+    public class DiagnosticMsg : UIElement {
+        private (int, int) PreviousCursorPosition {get; set;}
+
+        public DiagnosticMsg(string DiagnosticMessage) : base(1, (short)(DrawController.MaxY - 3)) {
+            PreviousCursorPosition = Console.GetCursorPosition();
+
+            string aestheticLine = "";
+            foreach (char countChar in DiagnosticMessage) aestheticLine += '~';
+            Content = new string[] {aestheticLine, DiagnosticMessage, aestheticLine};
+
+            DrawController.Draw(this);
+
+            Console.SetCursorPosition(PreviousCursorPosition.Item1, PreviousCursorPosition.Item2);
+            Console.ReadKey(false);
         }
     }
 }

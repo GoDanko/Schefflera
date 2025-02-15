@@ -9,18 +9,21 @@ namespace Schefflera
     {
         static void Main(string[] args)
         {
+
             UIElement commands = new UIElement(2, 1);
             commands.Content = new string[] {"--------------------------------",
             "|  Enter-continue Escape-Quit  |",
             "--------------------------------"};
             
-            TextEditorWindow editorWindow = new TextEditorWindow(48, 6, 4, 6);
+            TextEditorWindow editorWindow = new TextEditorWindow(3, 6, 64, 16);
+            Console.WriteLine("It didn't fail yet");
 
-            DrawController.ReinitialiseDisplayBuffer('x');
+            DrawController.ReinitialiseDisplayBuffer('.');
             DrawController.CastOnDisplayBuffer(commands);
-            DrawController.CastOnDisplayBuffer(editorWindow);   // This ain't working, because of the Fixed content being incorrectly drawn
+            DrawController.CastOnDisplayBuffer(editorWindow);
             DrawController.Draw();
 
+            editorWindow.AccessEditor();
         }
     }
 }
