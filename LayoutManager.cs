@@ -148,7 +148,7 @@ namespace LayoutMod
             foreach (char countChar in DiagnosticMessage) aestheticLine += '~';
             Content = new string[] {aestheticLine, DiagnosticMessage, aestheticLine};
 
-            DrawController.Draw(this);
+            DrawController.Draw(this); // This if repeated kills the program
 
             Console.SetCursorPosition(PreviousCursorPosition.Item1, PreviousCursorPosition.Item2);
             Console.ReadKey(false);

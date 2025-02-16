@@ -9,13 +9,12 @@ namespace Schefflera
     {
         static void Main(string[] args)
         {
-
-            UIElement commands = new UIElement(2, 1);
+            UIElement commands = new UIElement(3, 1);
             commands.Content = new string[] {"--------------------------------",
-            "|  Enter-continue Escape-Quit  |",
+            "|     C# Text Editor V.0023    |",
             "--------------------------------"};
             
-            TextEditorWindow editorWindow = new TextEditorWindow(3, 6, 64, 16);
+            TextEditorWindow editorWindow = new TextEditorWindow(3, 6, 42, 28);
             Console.WriteLine("It didn't fail yet");
 
             DrawController.ReinitialiseDisplayBuffer('.');
