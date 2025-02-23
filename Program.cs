@@ -14,9 +14,8 @@ namespace Schefflera
             "|     C# Text Editor V.0023    |",
             "--------------------------------"};
             
-            TextEditorWindow editorWindow = new TextEditorWindow(3, 6, 42, 28);
+            TextEditorWindow editorWindow = new TextEditorWindow(3, 6, 56, 28);
             Console.WriteLine("It didn't fail yet");
-
             DrawController.ReinitialiseDisplayBuffer('.');
             DrawController.CastOnDisplayBuffer(commands);
             DrawController.CastOnDisplayBuffer(editorWindow);
