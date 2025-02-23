@@ -15,10 +15,11 @@ namespace Schefflera
             "--------------------------------"};
             
             TextEditorWindow editorWindow = new TextEditorWindow(3, 6, 56, 28);
-            Console.WriteLine("It didn't fail yet");
             DrawController.ReinitialiseDisplayBuffer('.');
             DrawController.CastOnDisplayBuffer(commands);
+            Console.WriteLine("It didn't fail yet");
             DrawController.CastOnDisplayBuffer(editorWindow);
+            Console.WriteLine("It didn't fail yet");
             DrawController.Draw();
 
             editorWindow.AccessEditor();

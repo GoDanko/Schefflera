@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Dynamic;
 using TextMod;
 
 namespace LayoutMod
@@ -45,7 +46,7 @@ namespace LayoutMod
             Console.WriteLine(MaxX + "x" + MaxY);
         }
 
-        static internal void Draw(UIElement specificElement) {
+        static internal void Draw(UIElement specificElement) { // THIS METHOD CRASHES (when running it with DiagnostiMsg)
             AdjustConsoleBufferSize(default);
             Console.SetCursorPosition(specificElement.X, specificElement.Y);
 
@@ -79,6 +80,7 @@ namespace LayoutMod
         public short Y {get; set;}
         public short Width {get; set;}
         public short Height {get; set;}
+        public string[]? lines = null;
         private string[] content = new string[0];
         public string[] Content {
             get {return content;}
@@ -104,25 +106,73 @@ namespace LayoutMod
             }
             return longestRow;
         }
+
+        public string AdjustStringSize(string input, int length, char defaultChar = ' ') {
+            string result = input;
+            for (int i = input.Length; i < length; i++) {
+                result += defaultChar;
+            }
+            return result;
+        }
     }
 
     public class TextEditorWindow : UIElement {
+
+        public int editorLines {get; set;}
+
         public TextEditorWindow(short x, short y, short width, short height) : base(x, y) {
             Width = width;
             Height = height;
+            lines = UpdateContent("Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupiditate non provident, similique sunt in culpa, qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio, cumque nihil impedit, quo minus id, quod maxime placeat, facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet, ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat");
+            // UpdateContent seems to return an empty array, despite the lorem ipsum, check why.
             Content = AffirmFixedContent();
+        }
+        
+        string[] UpdateContent(string input) {
+            return UpdateContent(TextEditor.StringToCharArray(input));
+        }
+
+        string[] UpdateContent(char[] input) {
+            List<string> result = new List<string> ();
+            int lineLength = Width - 2;
+            if (input.Length < lineLength) {
+                short addedLines = 0;
+                string line = "";
+
+                for (int i = 0; i < input.Length; i++) {
+                    string word = "";
+
+                    for (int j = i; input[j] == ' '; j++) {
+                        word += input[j];
+                        i = j + 1;
+                    }
+
+                    if (line.Length + word.Length > lineLength) {
+                        result.Add(line);
+                        line = word + ' ';
+                        addedLines++;
+                    } else {
+                        line += word + ' ';
+                    }
+                }
+            }
+            return result.ToArray();
         }
 
         public string[] AffirmFixedContent() {
             List<string> result = new List<string> ();
             for (short y = 0; y < Height; y++) {
-                string rowContent = "";
-                for (short x = 0; x < Width; x++) {
-                    // Thread.Sleep(300);
-                    if (y == 0 || y == Height -1) rowContent += '-';
-                    else if (x == 0 || x == Width -1) rowContent += '|';
-                    else rowContent += ' ';
+                string rowContent = "|";
+                if (y == 0 || y == Height -1) {
+                    rowContent = "-";
+                    for (int i = 1; i < Width; i++) rowContent += '-';
+                } else if (lines != null && lines.Length > y) {
+                    rowContent += AdjustStringSize(lines[y - 1], Width - 2) + '|';
+                } else {
+                    for (int i = 0; i < Width - 2; i++) rowContent += ' ';
+                    rowContent += '|';
                 }
+
                 result.Add(rowContent);
             }
             return result.ToArray();
@@ -141,7 +191,7 @@ namespace LayoutMod
     public class DiagnosticMsg : UIElement {
         private (int, int) PreviousCursorPosition {get; set;}
 
-        public DiagnosticMsg(string DiagnosticMessage) : base(1, (short)(DrawController.MaxY - 3)) {
+        public DiagnosticMsg(string DiagnosticMessage) : base(1, (short) (DrawController.MaxY)) {
             PreviousCursorPosition = Console.GetCursorPosition();
 
             string aestheticLine = "";

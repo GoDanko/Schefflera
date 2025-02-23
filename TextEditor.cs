@@ -12,7 +12,7 @@ namespace TextMod
 
     internal class TextEditor
     {
-        public List<string> Text {get; set;}    // You can find a way to cut the text into pieces based on the Width of the editor
+        public char[] Text {get; set;}    // You can find a way to cut the text into pieces based on the Width of the editor
         private short Lines {get; set;}
         public byte CurrentTextIndex;
         private short FirstLineIndex {get; set;}
@@ -21,12 +21,8 @@ namespace TextMod
 
         public TextEditor(TextEditorWindow editorWindow) {
             EditorWindow = editorWindow;
-            Text = new List<string> () {""};
+            Text = new char[3] {'s', 'c', 'w'};
             Console.SetCursorPosition(EditorWindow.X + 1, EditorWindow.Y + 1);
-        }
-
-        void PopulateWindowContent() {
-            
         }
 
         internal bool RequestKey() {
@@ -36,6 +32,7 @@ namespace TextMod
             if (LastChar == '\0') {
                 if (pressedKey.Key == ConsoleKey.Backspace) {
                     // Yet to figure out the right implementation of backspace, to delete content
+                    return false;
                 }
                 if (pressedKey.Key == ConsoleKey.LeftArrow || pressedKey.Key == ConsoleKey.RightArrow || pressedKey.Key == ConsoleKey.UpArrow || pressedKey.Key == ConsoleKey.DownArrow) {
                     HandleNavigation(pressedKey);
@@ -76,7 +73,7 @@ namespace TextMod
             if (input.Key == ConsoleKey.LeftArrow) {
                 if (TrackCursor.Item1 < EditorWindow.X + 2) {
                     if (TrackCursor.Item2 > 0) {
-                        Console.SetCursorPosition(Text[TrackCursor.Item2 - 1].Length, TrackCursor.Item2 - 1);
+                        Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2);
                     }
                 } else {
                     Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2);
@@ -84,11 +81,19 @@ namespace TextMod
 
             } else if (input.Key == ConsoleKey.RightArrow) {
                 if (TrackCursor.Item1 > EditorWindow.X + EditorWindow.Width - 2) {
-
+                    
                 }
             }
 
             // if ((input.Modifiers & ConsoleModifiers.Control) != 0) {}    // Implement modifiers later, for now just check what sticks
+        }
+
+        static public char[] StringToCharArray(string input) {
+            List<char> result = new List<char> ();
+            for (int i = 0; i < input.Length; i++) {
+                result.Add(input[i]);
+            }
+            return result.ToArray();
         }
     }
 }
