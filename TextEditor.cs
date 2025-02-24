@@ -16,7 +16,7 @@ namespace TextMod
         private short Lines {get; set;}
         public byte CurrentTextIndex;
         private short FirstLineIndex {get; set;}
-        private char LastChar;
+        private char PressedKeyChar;
         private TextEditorWindow EditorWindow {get; set;}
 
         public TextEditor(TextEditorWindow editorWindow) {
@@ -27,9 +27,9 @@ namespace TextMod
 
         internal bool RequestKey() {
             ConsoleKeyInfo pressedKey = Console.ReadKey(true);
-            LastChar = pressedKey.KeyChar;
+            PressedKeyChar = pressedKey.KeyChar;
 
-            if (LastChar == '\0') {
+            if (PressedKeyChar == '\0') {
                 if (pressedKey.Key == ConsoleKey.Backspace) {
                     // Yet to figure out the right implementation of backspace, to delete content
                     return false;
@@ -38,16 +38,16 @@ namespace TextMod
                     HandleNavigation(pressedKey);
                     return false;
                 }
-            } else if (char.IsLetter(LastChar)) {
+            } else if (char.IsLetter(PressedKeyChar)) {
                 HandlePrintingChars();
                 return false;
-            } else if (char.IsDigit(LastChar)) {
+            } else if (char.IsDigit(PressedKeyChar)) {
                 HandlePrintingChars();
                 return false;
-            } else if (char.IsWhiteSpace(LastChar)) {
+            } else if (char.IsWhiteSpace(PressedKeyChar)) {
                 HandlePrintingChars();
                 return false;
-            } else if (char.IsSymbol(LastChar) || char.IsPunctuation(LastChar)) {
+            } else if (char.IsSymbol(PressedKeyChar) || char.IsPunctuation(PressedKeyChar)) {
                 HandlePrintingChars();
                 return false;
             }
@@ -61,28 +61,33 @@ namespace TextMod
             if (TrackCursor.Item1 >= EditorWindow.X + EditorWindow.Width - 1) {
                 Console.SetCursorPosition(EditorWindow.X + 1, TrackCursor.Item2 + 1);
             }
-            Text[0] += LastChar;
-            Console.Write(LastChar); // So this is teporary
+            Text[0] += PressedKeyChar;
+            Console.Write(PressedKeyChar); // So this is teporary
         }
         
-        private void HandleNavigation(ConsoleKeyInfo input) {   
-            // Needs more integration with String Text, to understand if there's content along which it can move
-
+        private void HandleNavigation(ConsoleKeyInfo input) { // kinda works
             (int, int) TrackCursor = Console.GetCursorPosition();
 
             if (input.Key == ConsoleKey.LeftArrow) {
                 if (TrackCursor.Item1 < EditorWindow.X + 2) {
                     if (TrackCursor.Item2 > 0) {
-                        Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2);
+                        Console.SetCursorPosition(EditorWindow.lines[TrackCursor.Item2 - EditorWindow.Y].Length - 1, TrackCursor.Item2 - 1);
                     }
                 } else {
                     Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2);
-                }
-
+                }            
             } else if (input.Key == ConsoleKey.RightArrow) {
-                if (TrackCursor.Item1 > EditorWindow.X + EditorWindow.Width - 2) {
-                    
+                if (TrackCursor.Item2 >= EditorWindow.lines[TrackCursor.Item2 - EditorWindow.Y].Length) {
+                    if (TrackCursor.Item2 <= EditorWindow.lines.Length) {
+                        Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2 + 1); // Overflows the editor
+                    }
+                } else {
+                    Console.SetCursorPosition(TrackCursor.Item1 + 1, TrackCursor.Item2);
                 }
+            } else if (input.Key == ConsoleKey.UpArrow) {
+                Console.SetCursorPosition(TrackCursor.Item1, TrackCursor.Item2 - 1);
+            } else if (input.Key == ConsoleKey.DownArrow) {
+                Console.SetCursorPosition(TrackCursor.Item1, TrackCursor.Item2 + 1);
             }
 
             // if ((input.Modifiers & ConsoleModifiers.Control) != 0) {}    // Implement modifiers later, for now just check what sticks
