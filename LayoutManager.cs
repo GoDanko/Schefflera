@@ -80,7 +80,6 @@ namespace LayoutMod
         public short Y {get; set;}
         public short Width {get; set;}
         public short Height {get; set;}
-        public string[]? lines = null;
         private string[] content = new string[0];
         public string[] Content {
             get {return content;}
@@ -118,57 +117,15 @@ namespace LayoutMod
 
     public class TextEditorWindow : UIElement {
 
-        public int editorLines {get; set;}
+        public string[]? Lines = null;
+        public int EditorLines {get; set;}
 
         public TextEditorWindow(short x, short y, short width, short height) : base(x, y) {
             Width = width;
             Height = height;
-            lines = UpdateContent("Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti.");
             Content = AffirmFixedContent();
         }
         
-        string[] UpdateContent(string input) {
-            return UpdateContent(TextEditor.StringToCharArray(input));
-        }
-
-        string[] UpdateContent(char[] input) {
-            List<string> result = new List<string> ();
-            int lineLength = this.Width - 2;    
-            if (input.Length > lineLength) {
-                string line = "";
-                int characterIndex = 0;
-
-                while (true) {
-                    bool exitLoop = false;
-                    string word = "";
-
-                    do {
-                        word += input[characterIndex];
-
-                        if (characterIndex >= input.Length - 1) {
-                            exitLoop = true;
-                            break;
-                        }
-                        characterIndex++;
-                    } while (input[characterIndex] != ' ');
-
-                    if (line.Length + word.Length > lineLength) {
-                        result.Add(line);
-                        if (word[0] == ' ') line = word.Substring(1);
-                        else line = word;
-                    } else {
-                        line += word;
-                    }
-
-                    if (exitLoop) {
-                        result.Add(line);
-                        break;
-                    }
-                }
-            }
-            return result.ToArray();
-        }
-
         public string[] AffirmFixedContent() {
             List<string> result = new List<string> ();
             for (short y = 0; y < Height; y++) {
@@ -176,8 +133,8 @@ namespace LayoutMod
                 if (y == 0 || y == Height -1) {
                     rowContent = "-";
                     for (int i = 1; i < Width; i++) rowContent += '-';
-                } else if (lines != null && lines.Length > y) {
-                    rowContent += AdjustStringSize(lines[y - 1], Width - 2) + '|';
+                } else if (Lines != null && Lines.Length > y) {
+                    rowContent += AdjustStringSize(Lines[y - 1], Width - 2) + '|';
                 } else {
                     for (int i = 0; i < Width - 2; i++) rowContent += ' ';
                     rowContent += '|';
@@ -188,14 +145,7 @@ namespace LayoutMod
             return result.ToArray();
         }
 
-        internal void AccessEditor() {
-            TextEditor editingLogic = new TextEditor(this);
-            
-            bool leaveLoop = false;
-            do {
-                leaveLoop = editingLogic.RequestKey();
-            } while (!leaveLoop);
-        }
+
     }
 
     public class DiagnosticMsg : UIElement {

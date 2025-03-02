@@ -14,15 +14,12 @@ namespace Schefflera
             "|     C# Text Editor V.0023    |",
             "--------------------------------"};
             
-            TextEditorWindow editorWindow = new TextEditorWindow(3, 6, 56, 28);
             DrawController.ReinitialiseDisplayBuffer('.');
             DrawController.CastOnDisplayBuffer(commands);
-            Console.WriteLine("It didn't fail yet");
-            DrawController.CastOnDisplayBuffer(editorWindow);
-            Console.WriteLine("It didn't fail yet");
             DrawController.Draw();
+            Console.WriteLine("MammaMIA! Avanti! FIGURATTI!");
 
-            editorWindow.AccessEditor();
+            TextEditor editingLogic = new TextEditor(3, 6, 56, 28);
         }
     }
 }

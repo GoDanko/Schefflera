@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\itali\\documents\\github\\schefflera\\schefflera.csproj": {}
+    "C:\\Users\\itali\\Documents\\GitHub\\Schefflera\\schefflera.csproj": {}
   },
   "projects": {
-    "C:\\Users\\itali\\documents\\github\\schefflera\\schefflera.csproj": {
+    "C:\\Users\\itali\\Documents\\GitHub\\Schefflera\\schefflera.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\itali\\documents\\github\\schefflera\\schefflera.csproj",
+        "projectUniqueName": "C:\\Users\\itali\\Documents\\GitHub\\Schefflera\\schefflera.csproj",
         "projectName": "schefflera",
-        "projectPath": "C:\\Users\\itali\\documents\\github\\schefflera\\schefflera.csproj",
+        "projectPath": "C:\\Users\\itali\\Documents\\GitHub\\Schefflera\\schefflera.csproj",
         "packagesPath": "C:\\Users\\itali\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\itali\\documents\\github\\schefflera\\obj\\",
+        "outputPath": "C:\\Users\\itali\\Documents\\GitHub\\Schefflera\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\itali\\AppData\\Roaming\\NuGet\\NuGet.Config"
