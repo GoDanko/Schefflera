@@ -1,4 +1,5 @@
 using System;
+using System.Dynamic;
 using System.Runtime.CompilerServices;
 using LayoutMod;
 
@@ -11,25 +12,39 @@ namespace TextMod
         public byte CurrentTextIndex;
         private short FirstLineIndex {get; set;}
         private char PressedKeyChar;
-        private TextEditorWindow EditorWindow {get; set;}
+        private TextEditorWindow TextElement {get; set;}
+        private TextPointer CurrentCursor {get; set;}
 
-        public TextEditor(short x, short y, short width, short height) {
-            Text = new char[3] {'s', 'c', 'w'};
-            EditorWindow = new TextEditorWindow(x, y, width, height);
-            StartEditing();
+        public TextEditor(short x, short y, short width, short height, string content = "") {
+            TextElement = new TextEditorWindow(x, y, width, height);
+
+            if (content == null || content == default) {
+                TextElement.Lines = new string[1] {""};
+                Text = new char[0];
+            } else {
+                TextElement.Lines = ParseToEditor(content);
+
+                Text = ArrayTooling.StringToCharArray(content);
+            }
+            TextElement.Content = TextElement.AffirmFixedContent();
+            DrawController.Draw(TextElement);
+
+            CurrentCursor = new TextPointer(TextElement, Text);
         }
-        internal void StartEditing() {
-            Console.SetCursorPosition(EditorWindow.X + 1, EditorWindow.Y + 1);
-            EditorWindow.Lines = UpdateContent("Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti.");
 
+        internal void StartEditing() {
+            CurrentCursor = new TextPointer(TextElement, Text);
+            
             bool leaveLoop = false;
             do {
-                EditorWindow.Content = EditorWindow.AffirmFixedContent();
-                DrawController.Draw(EditorWindow);
+                TextElement.Content = TextElement.AffirmFixedContent();
+                DrawController.Draw(TextElement);
 
                 leaveLoop = this.RequestKey();
+                TextElement.Lines = ParseToEditor("Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit, amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti.");
+
             } while (!leaveLoop);
-            DrawController.CastOnDisplayBuffer(EditorWindow);
+            DrawController.CastOnDisplayBuffer(TextElement);
         }
 
         internal bool RequestKey() {
@@ -66,35 +81,37 @@ namespace TextMod
             // Most likely You should delegate the drawing entirely to the UIElement and DrawController class
             (int, int) TrackCursor = Console.GetCursorPosition();
 
-            if (TrackCursor.Item1 >= EditorWindow.X + EditorWindow.Width - 1) {
-                Console.SetCursorPosition(EditorWindow.X + 1, TrackCursor.Item2 + 1);
+            if (TrackCursor.Item1 >= TextElement.X + TextElement.Width - 1) {
+                Console.SetCursorPosition(TextElement.X + 1, TrackCursor.Item2 + 1);
             }
             Text[0] += PressedKeyChar;
             Console.Write(PressedKeyChar); // So this is teporary
 
-            // YOUR NEXT GOAL is to assign the characters to the char[],
-            // while making sure that you move (if needed) all the
-            // following characters forward. And if needed you have to
-            // push the previous word to the next line, and if it
-            // doesn't fit, then move it even further; and so on!
+            // You need now To create a "pipeline" that will be used to affect char[] Text
+            // and TextWindow.Lines/Content, directly with the user, while also handling
+            // CurrentCursor's variables, to keep track of the changes.
+
+            // At the end of the day, there's a lot of "internal dependency" (I'm not sure
+            // if this term is accurate), so please, keep track of it, so you can start
+            // using a more integral architecture (abstracted as a whole), built by you.
         }
         
         private void HandleNavigation(ConsoleKeyInfo input) { // kinda works
             (int, int) TrackCursor = Console.GetCursorPosition();
 
             if (input.Key == ConsoleKey.LeftArrow) {
-                if (TrackCursor.Item1 < EditorWindow.X + 2) {
+                if (TrackCursor.Item1 < TextElement.X + 2) {
                     if (TrackCursor.Item2 > 0) {
-                        if (EditorWindow.Lines != null) {
-                            Console.SetCursorPosition(EditorWindow.Lines[TrackCursor.Item2 - EditorWindow.Y].Length - 1, TrackCursor.Item2 - 1);
+                        if (TextElement.Lines != null) {
+                            Console.SetCursorPosition(TextElement.Lines[TrackCursor.Item2 - TextElement.Y].Length - 1, TrackCursor.Item2 - 1);
                         }
                     }
                 } else {
                     Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2);
                 }            
             } else if (input.Key == ConsoleKey.RightArrow) {
-                if (EditorWindow.Lines != null && TrackCursor.Item2 >= EditorWindow.Lines[TrackCursor.Item2 - EditorWindow.Y].Length) {
-                    if (TrackCursor.Item2 <= EditorWindow.Lines.Length) {
+                if (TextElement.Lines != null && TrackCursor.Item2 >= TextElement.Lines[TrackCursor.Item2 - TextElement.Y].Length) {
+                    if (TrackCursor.Item2 <= TextElement.Lines.Length) {
                         Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2 + 1); // Overflows the editor
                     }
                 } else {
@@ -109,21 +126,64 @@ namespace TextMod
             // if ((input.Modifiers & ConsoleModifiers.Control) != 0) {}    // Implement modifiers later, for now just check what sticks
         }
 
-        static public char[] StringToCharArray(string input) {
-            List<char> result = new List<char> ();
-            for (int i = 0; i < input.Length; i++) {
-                result.Add(input[i]);
+        void PasteContentToCharArray(string pastedContent) {
+            char[] result = new char[Text.Length + pastedContent.Length];
+            ArrayTooling.OverwriteCharArray(ref result, Text, default, CurrentCursor.ObjectiveCharArrayPosition);
+
+            if (CurrentCursor.ObjectiveCharArrayPosition < Text.Length) {
+                ArrayTooling.OverwriteCharArray(ref result, ArrayTooling.StringToCharArray(pastedContent), CurrentCursor.ObjectiveCharArrayPosition, pastedContent.Length);
+                ArrayTooling.OverwriteCharArray(ref result, Text, CurrentCursor.ObjectiveCharArrayPosition + pastedContent.Length);
+
+            } else {
+                ArrayTooling.OverwriteCharArray(ref result, ArrayTooling.StringToCharArray(pastedContent), pastedContent.Length);
             }
-            return result.ToArray();
+
+            CurrentCursor.ObjectiveCharArrayPosition += pastedContent.Length;
         }
         
-        public string[] UpdateContent(string input) {
-            return UpdateContent(StringToCharArray(input));
+        void PasteContentToCharArray(char pastedChar) {
+            char[] result = new char[Text.Length + 1];
+            ArrayTooling.OverwriteCharArray(ref result, Text, default, CurrentCursor.ObjectiveCharArrayPosition);
+
+            if (CurrentCursor.ObjectiveCharArrayPosition < Text.Length) {
+                ArrayTooling.ShiftChars(ref result, pastedChar, CurrentCursor.ObjectiveCharArrayPosition);
+                ArrayTooling.OverwriteCharArray(ref result, Text, CurrentCursor.ObjectiveCharArrayPosition + 1);
+            } else {
+                ArrayTooling.ShiftChars(ref result, pastedChar, CurrentCursor.ObjectiveCharArrayPosition);
+            }
+
+            CurrentCursor.ObjectiveCharArrayPosition++;
         }
 
-        public string[] UpdateContent(char[] input) {
+        void UpdateCursorWithinElement(short moveBy = 1) {
+            if (TextElement.Lines != null) {
+                short accumulatedLength = 0;
+                byte lineJump = 0;
+
+                while (accumulatedLength < moveBy) {
+                    accumulatedLength += (short)TextElement.Lines[CurrentCursor.ObjectiveCurrentLine - 1 + lineJump].Length;
+                    lineJump++;
+                }
+                accumulatedLength -= (short)(accumulatedLength - moveBy);
+
+            }
+
+            // if (MovePointer())
+        }
+
+
+
+        void PushInput() {
+
+        }
+        
+        public string[] ParseToEditor(string input) {
+            return ParseToEditor(ArrayTooling.StringToCharArray(input));
+        }
+
+        public string[] ParseToEditor(char[] input) {
             List<string> result = new List<string> ();
-            int lineLength = EditorWindow.Width - 2;    
+            int lineLength = TextElement.Width - 2;    
             if (input.Length > lineLength) {
                 string line = "";
                 int characterIndex = 0;
@@ -160,31 +220,72 @@ namespace TextMod
         }
     }
 
-    public class Pointer {
-        short CoordinateX {get; set;}
-        short CoordinateY {get; set;}
-        short CurrentLine {get; set;}
+    public class TextPointer {
+            // Please make sure that until You're within the StartEditing loop
+            // that You're changing the values here as well, since this will
+            // allow You to keep track of the various important variables.
+        internal short CoordinateX {get; set;}
+        internal short CoordinateY {get; set;}
+        internal short CurrentColumn {get; set;}
+        internal short CurrentLine {get; set;}
+        internal short ObjectiveCurrentLine {get; set;}
+        internal int ObjectiveCharArrayPosition {get; set;}
 
-        public Pointer() {
-            (int, int) trackCursor = Console.GetCursorPosition();
+        public TextPointer(TextEditorWindow textElement, char[] charArray) {
+            if (textElement.Lines != null) {
+                ObjectiveCurrentLine = (short)(textElement.Lines.Length < 32766 ? textElement.Lines.Length : 0);
+                CoordinateX = (short)(textElement.Lines[ObjectiveCurrentLine - 1].Length);
+                CoordinateY = (short)(ObjectiveCurrentLine - 1);
+                ObjectiveCharArrayPosition = charArray.Length;
 
-            CoordinateX = (short)trackCursor.Item1;
-            CoordinateY = (short)trackCursor.Item2;
+            } else {
+                ObjectiveCurrentLine = (short) 0;
+                CoordinateX = (short)(textElement.X + 1);
+                CoordinateY = (short)(textElement.Y + 1);
+                ObjectiveCharArrayPosition = 0;
+            }
         }
 
-        public Pointer(short x, short y) {
-            CoordinateX = x;
-            CoordinateY = y;
-        }
-
-        public void MovePointer(short targetX, short targetY) {
+        public bool MovePointer(short targetX, short targetY) {
             if (targetX < Console.BufferWidth && targetY < Console.BufferHeight) {
                 Console.SetCursorPosition(targetX, targetY);
+                CoordinateX = targetX;
+                CoordinateY = targetY;
+                return true;
             }
+            return false;
+        }
+
+        private void FindCurrentLine() {
+
         }
 
         void ShiftPointer(short xShiftBy, short yShiftBy = 0) {
 
         }
+    }
+
+    static class ArrayTooling {
+        static public char[] StringToCharArray(string input) {
+            List<char> result = new List<char> ();
+            for (int i = 0; i < input.Length; i++) {
+                result.Add(input[i]);
+            }
+            return result.ToArray();
+        }
+
+        internal static void ShiftChars(ref char[] assignToArray, char pasteThis, int startHere) {
+            
+
+        }
+
+        internal static void OverwriteCharArray(ref char[] assignToArray, char[] pasteThis, int startHere = 0, int endHere = 0) {
+            if (endHere <= startHere) endHere = pasteThis.Length;
+
+            for (int i = 0; i < endHere; i++) {
+                assignToArray[i + startHere] = pasteThis[i];
+            }
+        }
+
     }
 }
