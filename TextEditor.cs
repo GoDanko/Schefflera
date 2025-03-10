@@ -7,7 +7,7 @@ namespace TextMod
 {
     internal class TextEditor
     {
-        public char[] Text {get; set;}    // You can find a way to cut the text into pieces based on the Width of the editor
+        public char[] Text {get; set;}
         private short Lines {get; set;}
         public byte CurrentTextIndex;
         private short FirstLineIndex {get; set;}
@@ -54,7 +54,6 @@ namespace TextMod
 
             if (PressedKeyChar == '\0') {
                 if (pressedKey.Key == ConsoleKey.Backspace) {
-                    // Yet to figure out the right implementation of backspace, to delete content
                     return false;
                 }
                 if (pressedKey.Key == ConsoleKey.LeftArrow || pressedKey.Key == ConsoleKey.RightArrow || pressedKey.Key == ConsoleKey.UpArrow || pressedKey.Key == ConsoleKey.DownArrow) {
@@ -78,14 +77,13 @@ namespace TextMod
         }
 
         void HandlePrintingChars() {
-            // Most likely You should delegate the drawing entirely to the UIElement and DrawController class
             (int, int) TrackCursor = Console.GetCursorPosition();
 
             if (TrackCursor.Item1 >= TextElement.X + TextElement.Width - 1) {
                 Console.SetCursorPosition(TextElement.X + 1, TrackCursor.Item2 + 1);
             }
             Text[0] += PressedKeyChar;
-            Console.Write(PressedKeyChar); // So this is teporary
+            Console.Write(PressedKeyChar);
 
             // You need now To create a "pipeline" that will be used to affect char[] Text
             // and TextWindow.Lines/Content, directly with the user, while also handling
@@ -96,7 +94,7 @@ namespace TextMod
             // using a more integral architecture (abstracted as a whole), built by you.
         }
         
-        private void HandleNavigation(ConsoleKeyInfo input) { // kinda works
+        private void HandleNavigation(ConsoleKeyInfo input) {
             (int, int) TrackCursor = Console.GetCursorPosition();
 
             if (input.Key == ConsoleKey.LeftArrow) {
@@ -112,7 +110,7 @@ namespace TextMod
             } else if (input.Key == ConsoleKey.RightArrow) {
                 if (TextElement.Lines != null && TrackCursor.Item2 >= TextElement.Lines[TrackCursor.Item2 - TextElement.Y].Length) {
                     if (TrackCursor.Item2 <= TextElement.Lines.Length) {
-                        Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2 + 1); // Overflows the editor
+                        Console.SetCursorPosition(TrackCursor.Item1 - 1, TrackCursor.Item2 + 1);
                     }
                 } else {
                     Console.SetCursorPosition(TrackCursor.Item1 + 1, TrackCursor.Item2);
@@ -122,8 +120,6 @@ namespace TextMod
             } else if (input.Key == ConsoleKey.DownArrow) {
                 Console.SetCursorPosition(TrackCursor.Item1, TrackCursor.Item2 + 1);
             }
-
-            // if ((input.Modifiers & ConsoleModifiers.Control) != 0) {}    // Implement modifiers later, for now just check what sticks
         }
 
         void PasteContentToCharArray(string pastedContent) {
@@ -167,8 +163,6 @@ namespace TextMod
                 accumulatedLength -= (short)(accumulatedLength - moveBy);
 
             }
-
-            // if (MovePointer())
         }
 
 
@@ -276,7 +270,6 @@ namespace TextMod
 
         internal static void ShiftChars(ref char[] assignToArray, char pasteThis, int startHere) {
             
-
         }
 
         internal static void OverwriteCharArray(ref char[] assignToArray, char[] pasteThis, int startHere = 0, int endHere = 0) {
