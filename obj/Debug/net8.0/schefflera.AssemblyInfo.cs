@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("schefflera")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9ecb6d9b6e87fe0088c2c9eeb9a447d25fee868a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6f04da462d2aa27ba836d8dec841f658feff9e36")]
 [assembly: System.Reflection.AssemblyProductAttribute("schefflera")]
 [assembly: System.Reflection.AssemblyTitleAttribute("schefflera")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
