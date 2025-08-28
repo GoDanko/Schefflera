@@ -25,20 +25,20 @@ namespace VOutput
                 NestedWithin = nestedWithin != null ? nestedWithin : ConsoleSpace,
             };
 
-            (ushort toPosition, ushort toSize) xCorrection = Div.ValidateDivParameters(ref position.x, ref size.x, (ushort)(result.NestedWithin.Position.x + result.NestedWithin.Size.x));
-            (ushort toPosition, ushort toSize) yCorrection = Div.ValidateDivParameters(ref position.y, ref size.y, (ushort)(result.NestedWithin.Position.y + result.NestedWithin.Size.y));
+            (ushort toPosition, ushort toSize) xCorrection = Div.EnforceBounds(ref position.x, ref size.x, (ushort)(result.NestedWithin.Position.x + result.NestedWithin.Size.x));
+            (ushort toPosition, ushort toSize) yCorrection = Div.EnforceBounds(ref position.y, ref size.y, (ushort)(result.NestedWithin.Position.y + result.NestedWithin.Size.y));
 
             result.Position = (position.x, position.y);
             result.Size = (size.x, size.y);
             return result;
         }
 
-        public static char[,] CreateFrame(ushort sizeX, ushort sizeY) {
+        public static char[,] BoxContent(ushort sizeX, ushort sizeY) {
             char[,] result = new char[sizeX, sizeY];
 
             for (ushort y = 0; y < sizeY; y++) {
                 result[0, y] = '|';
-                result[sizeX - 1, y] = '-';
+                result[sizeX - 1, y] = '|';
             }
             for (ushort x = 0; x < sizeX; x++) {
                 result[x, 0] = '-';
@@ -64,15 +64,9 @@ namespace VOutput
             Size = size;
         }
 
-        internal static (ushort toPosition, ushort toSize) ValidateDivParameters(ref ushort positionDimension, ref ushort sizeDimension, ushort dimensionBoundary) {
+        internal static (ushort toPosition, ushort toSize) EnforceBounds(ref ushort positionDimension, ref ushort sizeDimension, ushort dimensionBoundary) {
 
             (ushort toPosition, ushort toSize) correction = (0, 0);
-
-            if (sizeDimension < positionDimension) {
-                ushort int16 = positionDimension;
-                positionDimension = sizeDimension;
-                sizeDimension = int16;
-            }
             
             if (positionDimension + sizeDimension > dimensionBoundary) {
                 ushort moveTargetBy = (ushort)(positionDimension + sizeDimension - dimensionBoundary);
@@ -92,20 +86,20 @@ namespace VOutput
 
         internal void Draw() {
             Span<char> Line = stackalloc char[Size.x];
-            for (ushort y = 0; y < Size.y; y++) {
+            Console.SetCursorPosition(Position.x, Position.y);
 
+            for (ushort y = 0; y < Size.y; y++) {
                 for (ushort x = 0; x < Size.x; x++) {
-                    Line[x] = content[x, y + Position.y] != '\0' ? content[x, y + Position.y] : ' ';
-                    // Index was outside the bounds of the array ^
+                    Line[x] = content[x, y] != '\0' ? content[x, y] : ' ';
                 }
                 Console.WriteLine($"{Line}");
-                Console.SetCursorPosition(Position.x, y + Position.y);
+                Console.SetCursorPosition(Position.x, y + Position.y + 1);
             }
         }
     }
 
     static class TestsVOuput {
-        internal static byte[] TEST_ValidateDivParameters() {
+        internal static byte[] TEST_EnforceBounds() {
 
             List<byte> faliurePoints = new List<byte> ();
 
@@ -113,15 +107,15 @@ namespace VOutput
             ushort TEST_DimensionPosition = 2;
             ushort TEST_DimensionSize = 8;
 
-            (ushort CorrectionToPosition, ushort CorrectionToSize) testID1 = Div.ValidateDivParameters(ref TEST_DimensionPosition, ref TEST_DimensionSize, TEST_boundary);
+            (ushort CorrectionToPosition, ushort CorrectionToSize) testID1 = Div.EnforceBounds(ref TEST_DimensionPosition, ref TEST_DimensionSize, TEST_boundary);
             if (testID1.CorrectionToPosition != 0 || testID1.CorrectionToSize != 0) { faliurePoints.Add(1); }
 
             TEST_DimensionPosition = 10;
-            (ushort CorrectionToPosition, ushort CorrectionToSize) testID2 = Div.ValidateDivParameters(ref TEST_DimensionPosition, ref TEST_DimensionSize, TEST_boundary);
+            (ushort CorrectionToPosition, ushort CorrectionToSize) testID2 = Div.EnforceBounds(ref TEST_DimensionPosition, ref TEST_DimensionSize, TEST_boundary);
             if (testID2.CorrectionToPosition != 2 || testID2.CorrectionToSize > 0) { faliurePoints.Add(2); }
 
             TEST_DimensionPosition = 18;
-            (ushort CorrectionToPosition, ushort CorrectionToSize) testID3 = Div.ValidateDivParameters(ref TEST_DimensionPosition, ref TEST_DimensionSize, TEST_boundary);
+            (ushort CorrectionToPosition, ushort CorrectionToSize) testID3 = Div.EnforceBounds(ref TEST_DimensionPosition, ref TEST_DimensionSize, TEST_boundary);
             if (testID3.CorrectionToPosition != 10 || testID3.CorrectionToSize != 2) { faliurePoints.Add(3); }
 
             return faliurePoints.ToArray();

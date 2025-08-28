@@ -1,4 +1,5 @@
 using System;
+using System.Net.Sockets;
 using System.Reflection;
 using VOutput;
 
@@ -16,6 +17,10 @@ namespace TextMod
             TextEditor editor = new TextEditor();
 
             return editor;
+        }
+
+        internal void DismissEditor() {
+            ShutDown = true;
         }
     }
 
