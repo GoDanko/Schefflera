@@ -2,6 +2,7 @@ using System;
 using System.Net.Sockets;
 using System.Reflection;
 using VOutput;
+using FileManager;
 
 namespace TextMod
 {
@@ -9,12 +10,15 @@ namespace TextMod
         private bool shutDown = false;
         public bool ShutDown { get {return shutDown;} private set {shutDown = value;} }
         internal Div EditorBody;
+        internal FileHandler? editedFile;
         public TextEditor() {
             EditorBody = Display.CreateDiv((0, 2), (Display.XConsoleBuffer, (ushort)(Display.YConsoleBuffer - 2)), Display.ConsoleSpace);
         }
 
-        static internal TextEditor CallEditor() {
+        internal static TextEditor CallEditor(string? filePath = null) {
             TextEditor editor = new TextEditor();
+
+            if (filePath != null) editor.editedFile = FileHandler.NewFile(filePath, true);
 
             return editor;
         }
@@ -22,6 +26,10 @@ namespace TextMod
         internal void DismissEditor() {
             ShutDown = true;
         }
+    }
+
+    static class TextHandler {
+
     }
 
     static class StringTooling 

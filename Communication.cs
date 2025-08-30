@@ -18,22 +18,28 @@ namespace WithUserCommunication {
             manifestContent = ContentsToOutput;
         }
 
-        static public Manifest Call(List<string> ContentsToOutput) {
+        public static Manifest Call(List<string> ContentsToOutput) {
 
             Manifest manifestMsg = new Manifest(ContentsToOutput);
 
             if (manifestMsg.manifestContent.Count > 0) { 
 
-                ushort LongestText = 0;
-                for (ushort i = 0; i < manifestMsg.manifestContent.Count; i++) {
-                    if (manifestMsg.manifestContent[i].Length > LongestText) { LongestText = (ushort)manifestMsg.manifestContent[i].Length; }
-                }
+                // ushort LongestText = 0;
+                // for (ushort i = 0; i < manifestMsg.manifestContent.Count; i++) {
+                //     if (manifestMsg.manifestContent[i].Length > LongestText) { LongestText = (ushort)manifestMsg.manifestContent[i].Length; }
+                // }
 
                 manifestMsg.instanceX = (ushort)(MaxX + padding < Display.XConsoleBuffer ? MaxX : Display.XConsoleBuffer - padding);
-                manifestMsg.instanceY = (ushort)(LongestText > MaxX - padding ? LongestText / (MaxX - padding) + padding : 1 + padding);
-                if (manifestMsg.instanceY > LimitLines + padding) { manifestMsg.instanceY = LimitLines + padding ; }
                 
-                if (manifestMsg.instanceX < MinX) { return manifestMsg; }
+                ushort mostLinesQuota = 0;
+                for (ushort i = 0; i < manifestMsg.manifestContent.Count; i++) {
+                    ushort mostLinesForElement = (ushort)StringTooling.SplitStringForLength(manifestMsg.manifestContent[i], manifestMsg.instanceX - padding).Length;
+                    if (mostLinesForElement > mostLinesQuota) mostLinesQuota = mostLinesForElement;
+                }
+                
+                // manifestMsg.instanceY = (ushort)(LongestText > MaxX - padding ? LongestText / (MaxX - padding) + padding : 1 + padding);
+                manifestMsg.instanceY = (ushort)(mostLinesQuota > LimitLines ? LimitLines + padding : mostLinesQuota + padding);
+                // if (manifestMsg.instanceY > LimitLines + padding) { manifestMsg.instanceY = LimitLines + padding ; }
 
                 (ushort x, ushort y) expectedPosition = ((ushort)(Display.XConsoleBuffer / 2 - manifestMsg.instanceX / 2), (ushort)(Display.YConsoleBuffer / 2 - manifestMsg.instanceY / 2));
                 Div manifestBody = Display.CreateDiv(expectedPosition, (manifestMsg.instanceX, manifestMsg.instanceY));
@@ -62,15 +68,21 @@ namespace WithUserCommunication {
 
         char[,] ConstructManifestBody(Div manifestBody, ref ushort? scrollValue) {
 
-            string[] preparedText = StringTooling.SplitStringForLength(manifestContent[printIndex], manifestBody.Size.x - padding);
+            string[] preparedText = StringTooling.SplitStringForLength(manifestContent[printIndex], manifestBody.Size.x - 7);
             (ushort x, ushort y) overwriteUntil = ((ushort)(manifestBody.Size.x - padding), (ushort)preparedText.Length);
             
             if (preparedText.Length > LimitLines) {
                 if (!scrollValue.HasValue) scrollValue = 0;
                 else if (scrollValue > ushort.MaxValue / 2) scrollValue = 0;
                 else if (scrollValue > preparedText.Length - LimitLines) scrollValue = (ushort)(preparedText.Length - LimitLines);
+
+            } else {
+                if (preparedText.Length + padding - 1 > manifestBody.Size.y) {
+                    manifestBody.Size.y += (ushort)(preparedText.Length + padding - 1 - manifestBody.Size.y);
+                    manifestBody.Position.y += (ushort)(preparedText.Length + padding - 1 - manifestBody.Size.y);
+                }
+                scrollValue = null;
             }
-            else scrollValue = null;
             
             char[,] result = new char[manifestBody.Size.x, manifestBody.Size.y];
             result = manifestBody.content = Display.BoxContent(manifestBody.Size.x, manifestBody.Size.y);
